@@ -55,6 +55,20 @@ class Blockchain(object):
         )
         return self.last_block['index'] + 1
     
+    def proof_of_work(self, last_proof):
+        """
+        Simple Proof of Work Alogrithm:
+        - Find a number p' such that hash(pp') contains leading 4 zeros,
+        where p is the previous p'
+        - p is the previous proof, and p' is the new proof
+        return: <int> 
+        """
+        proof = 0
+        while self.valid_proof(last_proof, proof) is False:
+            proof += 1
+        
+        return proof
+
     @staticmethod
     def hash(block):
         # Hashes a Block
@@ -69,6 +83,17 @@ class Blockchain(object):
         block_string = json.dumps(block, sort_keys=True).encode()
         return hashlib.sha256(block_string.hexdigest())
 
+    @staticmethod
+    def valid_proof(last_proof, proof):
+        """
+        Validates the Proof: Does hash(last_proof, proof) contain 4 leading zeros?
+        :param last_proof: <int> Previous Proof
+        :param proof: <int> Current Proof
+        :return: <bool> True if correct, False if not.
+        """
+        guess = f'{last_proof}{proof}'.encode()
+        guess_hash = hashlib.sha256(guess).hexdigest()
+        return guess_hash[:4] == "0000"
     @property
     def last_block(self):
         # Returns the last Block in the chain
